@@ -21,31 +21,35 @@
 
   - register
 
-  把任务的输出定义为变量，然后用于其他任务，示例如下:
+    把任务的输出定义为变量，然后用于其他任务，示例如下:
 
-    ```
-  tasks:
-       - shell: /usr/bin/foo
-         register: foo_result
-         ignore_errors: True
-    ```
+      ```
+    tasks:
+        - shell: /usr/bin/foo
+          register: foo_result
+          ignore_errors: True
+      ```
 
   
 
   - 通过命令行传递变量
 
-  在运行playbook的时候也可以传递一些变量供playbook使用，示例如下：
+    在运行playbook的时候也可以传递一些变量供playbook使用，示例如下：
 
+    ``` sh
   	ansible-playbook test.yml --extra-vars "hosts=www user=mageedu"
+    ```
 
   - 通过roles传递变量
 
-  当给一个主机应用角色的时候可以传递变量，然后在角色内使用这些变量，示例如下：
+    当给一个主机应用角色的时候可以传递变量，然后在角色内使用这些变量，示例如下：
 
+    ``` yaml
   	- hosts: webservers
   	  roles:
   	    - common
   	    - { role: foo_app_instance, dir: '/web/htdocs/a.com',  port: 8080 }
+    ```
 
 - Inventory
 
@@ -68,100 +72,100 @@
   	db2.magedu.com
   	db3.magedu.com
 
-  如果主机名称遵循相似的命名模式，还可以使用列表的方式标识各主机，例如：
+    如果主机名称遵循相似的命名模式，还可以使用列表的方式标识各主机，例如：
 
-  ``` sh
-  [webservers]
-  www[01:50].example.com
-  
-  [databases]
-  db-[a:f].example.com
-  ```
+    ``` sh
+    [webservers]
+    www[01:50].example.com
+    
+    [databases]
+    db-[a:f].example.com
+    ```
 
   
 
   - 主机变量
 
-  可以在inventory中定义主机时为其添加主机变量以便于在playbook中使用。例如：
+    可以在inventory中定义主机时为其添加主机变量以便于在playbook中使用。例如：
 
-  ``` sh
-  [webservers]
-  www1.magedu.com http_port=80 maxRequestsPerChild=808
-  www2.magedu.com http_port=8080 maxRequestsPerChild=909
-  ```
+    ``` sh
+    [webservers]
+    www1.magedu.com http_port=80 maxRequestsPerChild=808
+    www2.magedu.com http_port=8080 maxRequestsPerChild=909
+    ```
 
   
 
   - 组变量
 
-  组变量是指赋予给指定组内所有主机上的在playboo中可用的变量。例如：
+    组变量是指赋予给指定组内所有主机上的在playboo中可用的变量。例如：
 
-  ``` sh
-  [webservers]
-  www1.magedu.com
-  www2.magedu.com
-  
-  [webservers:vars]
-  ntp_server=ntp.magedu.com
-  nfs_server=nfs.magedu.com
-  ```
+    ``` sh
+    [webservers]
+    www1.magedu.com
+    www2.magedu.com
+    
+    [webservers:vars]
+    ntp_server=ntp.magedu.com
+    nfs_server=nfs.magedu.com
+    ```
 
   
 
   - 组嵌套
 
-  inventory中，组还可以包含其它的组，并且也可以向组中的主机指定变量。不过，这些变量只能在ansible-playbook中使用，而ansible不支持。例如：
+    inventory中，组还可以包含其它的组，并且也可以向组中的主机指定变量。不过，这些变量只能在ansible-playbook中使用，而ansible不支持。例如：
 
-  ``` sh
-  [apache]
-  httpd1.magedu.com
-  httpd2.magedu.com
-  
-  [nginx]
-  ngx1.magedu.com
-  ngx2.magedu.com
-  
-  [webservers:children]
-  apache
-  nginx
-  
-  [webservers:vars]
-  ntp_server=ntp.magedu.com
-  ```
+    ``` sh
+    [apache]
+    httpd1.magedu.com
+    httpd2.magedu.com
+    
+    [nginx]
+    ngx1.magedu.com
+    ngx2.magedu.com
+    
+    [webservers:children]
+    apache
+    nginx
+    
+    [webservers:vars]
+    ntp_server=ntp.magedu.com
+    ```
 
   
 
   - inventory参数
 
-  ansible基于ssh连接inventory中指定的远程主机时，还可以通过参数指定其交互方式；这些参数如下所示：
+    ansible基于ssh连接inventory中指定的远程主机时，还可以通过参数指定其交互方式；这些参数如下所示：
 
-  ``` sh
-  ansible_ssh_host
-    The name of the host to connect to, if different from the alias you wish to give to it.
-  ansible_ssh_port
-    The ssh port number, if not 22
-  ansible_ssh_user
-    The default ssh user name to use.
-  ansible_ssh_pass
-    The ssh password to use (this is insecure, we strongly recommend using --ask-pass or SSH keys)
-  ansible_sudo_pass
-    The sudo password to use (this is insecure, we strongly recommend using --ask-sudo-pass)
-  ansible_connection
-    Connection type of the host. Candidates are local, ssh or paramiko.  The default is paramiko before Ansible 1.2, and 'smart' afterwards which detects whether usage of 'ssh' would be feasible based on whether ControlPersist is supported.
-  ansible_ssh_private_key_file
-    Private key file used by ssh.  Useful if using multiple keys and you don't want to use SSH agent.
-  ansible_shell_type
-    The shell type of the target system. By default commands are formatted using 'sh'-style syntax by default. Setting this to 'csh' or 'fish' will cause commands executed on target systems to follow those shell's syntax instead.
-  ansible_python_interpreter
-    The target host python path. This is useful for systems with more
-    than one Python or not located at "/usr/bin/python" such as \*BSD, or where /usr/bin/python
-    is not a 2.X series Python.  We do not use the "/usr/bin/env" mechanism as that requires the remote user's
-    path to be set right and also assumes the "python" executable is named python, where the executable might
-    be named something like "python26".
-  ansible\_\*\_interpreter
-    Works for anything such as ruby or perl and works just like ansible_python_interpreter.
-    This replaces shebang of modules which will run on that host.
-  ```
+    ``` sh
+    ansible_ssh_host
+      The name of the host to connect to, if different from the alias you wish to give to it.
+    ansible_ssh_port
+      The ssh port number, if not 22
+    ansible_ssh_user
+      The default ssh user name to use.
+    ansible_ssh_pass
+      The ssh password to use (this is insecure, we strongly recommend using --ask-pass or SSH keys)
+    ansible_sudo_pass
+      The sudo password to use (this is insecure, we strongly recommend using --ask-sudo-pass)
+    ansible_connection
+      Connection type of the host. Candidates are local, ssh or paramiko.  The default is paramiko before Ansible 1.2, and 'smart' afterwards which detects whether usage of 'ssh' would be feasible based on whether ControlPersist is supported.
+    ansible_ssh_private_key_file
+      Private key file used by ssh.  Useful if using multiple keys and you don't want to use SSH agent.
+    ansible_shell_type
+      The shell type of the target system. By default commands are formatted using 'sh'-style syntax by default. Setting this to 'csh' or 'fish' will cause commands executed on target systems to follow those shell's syntax instead.
+    ansible_python_interpreter
+      The target host python path. This is useful for systems with more
+      than one Python or not located at "/usr/bin/python" such as \*BSD, or where /usr/bin/python
+      is not a 2.X series Python.  We do not use the "/usr/bin/env" mechanism as that requires the remote user's
+      path to be set right and also assumes the "python" executable is named python, where the executable might
+      be named something like "python26".
+    ansible\_\*\_interpreter
+      Works for anything such as ruby or perl and works just like ansible_python_interpreter.
+      This replaces shebang of modules which will run on that host.
+    ```
 
   
 
@@ -435,122 +439,122 @@
   job: developer
   ```
 
-  - 也可以将k/v放于{}中，用逗号区分多个k/v
+- 也可以将k/v放于{}中，用逗号区分多个k/v
 
-    ``` sh
-    {name: aaa,job: developer}
-    ```
+  ``` sh
+  {name: aaa,job: developer}
+  ```
 
 ##### 多实例
 
 - 创建用户，组，copy文件
 
-``` yaml
-[root@node1 playbook]# cat test.yml 
-- hosts: websers
-  remote_user: root
-  tasks:
-  - name: add group
-    group: system=yes name=nginx gid=2018
-  - name: add user
-    user: system=yes name=nginx group=nginx uid=2018
-- hosts: dbsers
-  remote_user: root
-  tasks:
-  - name: copy file
-    copy: src=/etc/passwd dest=/tmp/
-```
+  ``` yaml
+  [root@node1 playbook]# cat test.yml 
+  - hosts: websers
+    remote_user: root
+    tasks:
+    - name: add group
+      group: system=yes name=nginx gid=2018
+    - name: add user
+      user: system=yes name=nginx group=nginx uid=2018
+  - hosts: dbsers
+    remote_user: root
+    tasks:
+    - name: copy file
+      copy: src=/etc/passwd dest=/tmp/
+  ```
 
 - handlers：触发器
 
-``` yaml
-- hosts: websers
-  remote_user: root
-  tasks:
-  - name: install httpd
-    yum: name=httpd state=latest
-  - name: copy httpd.conf to service
-    copy: src=/root/httpd.conf dest=/etc/httpd/conf/httpd.conf
-    notify:  ##通知
-    - restart httpd
-  - name: start service
-    service : name=httpd enabled=yes state=started
-  handlers:  ##处理
-  - name: restart httpd
-    service: name=httpd state=restarted
-```
+  ``` yaml
+  - hosts: websers
+    remote_user: root
+    tasks:
+    - name: install httpd
+      yum: name=httpd state=latest
+    - name: copy httpd.conf to service
+      copy: src=/root/httpd.conf dest=/etc/httpd/conf/httpd.conf
+      notify:  ##通知
+      - restart httpd
+    - name: start service
+      service : name=httpd enabled=yes state=started
+    handlers:  ##处理
+    - name: restart httpd
+      service: name=httpd state=restarted
+  ```
 
 - var 变量
 
-``` yaml
-- hosts: websers
-  remote_user: root
-  tasks:
-  - name: copy
-    copy: content="{{ ansible_all_ipv4_addresses }} {{ test }}" dest=/tmp/var.log
-```
+  ``` yaml
+  - hosts: websers
+    remote_user: root
+    tasks:
+    - name: copy
+      copy: content="{{ ansible_all_ipv4_addresses }} {{ test }}" dest=/tmp/var.log
+  ```
 
 - when 
 
-``` yaml
-- hosts: all
-  remote_user: root
-  vars:
-  - users: hello
-  tasks:
-  - name: add user {{ users }}
-    user: name={{ users }}
-    when: ansible_fqdn == "node2-clone"
-```
+  ``` yaml
+  - hosts: all
+    remote_user: root
+    vars:
+    - users: hello
+    tasks:
+    - name: add user {{ users }}
+      user: name={{ users }}
+      when: ansible_fqdn == "node2-clone"
+  ```
 
 - template:模板
 
-``` yaml
+  ``` yaml
 
-- hosts: websers
-  remote_user: root
-  vars:
-  - pkgs: httpd
-  - sers: httpd
-  tasks:
-  - name: install httpd
-    yum: name={{ pkgs }} state=latest
-  - name: copy httpd.conf to service
-    template: src=/root/template/httpd.conf.j2 dest=/etc/httpd/conf/httpd.conf
-    notify:
-    - restart httpd
-  - name: start service
-    service : name={{ sers }} enabled=yes state=started
-  handlers:
-  - name: restart httpd
-    service: name=httpd state=restarted
-```
+  - hosts: websers
+    remote_user: root
+    vars:
+    - pkgs: httpd
+    - sers: httpd
+    tasks:
+    - name: install httpd
+      yum: name={{ pkgs }} state=latest
+    - name: copy httpd.conf to service
+      template: src=/root/template/httpd.conf.j2 dest=/etc/httpd/conf/httpd.conf
+      notify:
+      - restart httpd
+    - name: start service
+      service : name={{ sers }} enabled=yes state=started
+    handlers:
+    - name: restart httpd
+      service: name=httpd state=restarted
+  ```
 
 - tags标签
 
-``` yaml
-- hosts: websers
-  remote_user: root
-  vars:
-  - pkgs: httpd
-  - sers: httpd
-  tasks:
-  - name: install httpd
-    yum: name={{ pkgs }} state=latest
-  - name: copy httpd.conf to service
-    template: src=/root/template/httpd.conf.j2 dest=/etc/httpd/conf/httpd.conf
-    tags:
-    - tags1
-    notify:
-    - restart httpd
-  - name: start service
-    service : name={{ sers }} enabled=yes state=started
-  handlers:
-  - name: restart httpd
-    service: name=httpd state=restarted
-    
-[root@node1 playbook]# ansible-playbook apache.tags.yml --tags="tags1"
-```
+  ``` yaml
+  - hosts: websers
+    remote_user: root
+    vars:
+    - pkgs: httpd
+    - sers: httpd
+    tasks:
+    - name: install httpd
+      yum: name={{ pkgs }} state=latest
+    - name: copy httpd.conf to service
+      template: src=/root/template/httpd.conf.j2 dest=/etc/httpd/conf/httpd.conf
+      tags:
+      - tags1
+      notify:
+      - restart httpd
+    - name: start service
+      service : name={{ sers }} enabled=yes state=started
+    handlers:
+    - name: restart httpd
+      service: name=httpd state=restarted
+      
+  [root@node1 playbook]# ansible-playbook apache.tags.yml --tags="tags1"
+  ```
 
 
 
@@ -560,58 +564,58 @@
 
 - 一个roles的案例如下所示：
 
-``` 
-		site.yml
-		webservers.yml
-		dbservers.yml
-		roles/
-		   common/
-		     files/
-		     templates/
-		     tasks/
-		     handlers/
-		     vars/
-		     meta/
-		   webservers/
-		     files/
-		     templates/
-		     tasks/
-		     handlers/
-		     vars/
-		     meta/
-```
+  ``` 
+  site.yml
+  webservers.yml
+  dbservers.yml
+  roles/
+      common/
+        files/
+        templates/
+        tasks/
+        handlers/
+        vars/
+        meta/
+      webservers/
+        files/
+        templates/
+        tasks/
+        handlers/
+        vars/
+        meta/
+  ```
 
 - 而在playbook中，可以这样使用roles：
 
-``` yaml
-	---
-	- hosts: webservers
-	  roles:
-	     - common
-	     - webservers
-```
+  ``` yaml
+  ---
+  - hosts: webservers
+    roles:
+        - common
+        - webservers
+  ```
 
 - 也可以向roles传递参数，例如：
 
-``` yaml
-	---
+  ``` yaml
+  ---
 
-	- hosts: webservers
-	  roles:
-	    - common
-	    - { role: foo_app_instance, dir: '/opt/a',  port: 5000 }
-	    - { role: foo_app_instance, dir: '/opt/b',  port: 5001 }
-```
+  - hosts: webservers
+    roles:
+      - common
+      - { role: foo_app_instance, dir: '/opt/a',  port: 5000 }
+      - { role: foo_app_instance, dir: '/opt/b',  port: 5001 }
+  ```
 
 - 甚至也可以条件式地使用roles，例如：
 
-``` yaml
-	---
+  ``` yaml
+  ---
 
-	- hosts: webservers
-	  roles:
-	    - { role: some_role, when: "ansible_os_family == 'RedHat'" }
-```
+  - hosts: webservers
+    roles:
+      - { role: some_role, when: "ansible_os_family == 'RedHat'" }
+  ```
 
 ##### 创建role的步骤
 
