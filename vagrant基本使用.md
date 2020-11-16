@@ -2,7 +2,7 @@
 
 ## 安装 box
 
-- 官方下载<br>
+- ### 官方下载<br>
     [官方box的下载地址](https://app.vagrantup.com/boxes/search)<br>
 
     查看要下载的 `box` 的名称，加在指令后
@@ -11,7 +11,7 @@
     ```
 
 
-- 镜像下载<br>
+- ### 镜像下载<br>
     [镜像的下载地址](http://www.vagrantbox.es/)<br>
     使用镜像需要本地下载（迅雷挺快），再通过选择本地文件的方式添加`box`
 
@@ -26,14 +26,14 @@
 
 ## 管理 box
 
-- 查看 `box` 列表
+- ### 查看 `box` 列表
 
     ``` sh
     # 查看box列表
     vagrant box list
     ```
 
-- 删除 `box`
+- ### 删除 `box`
 
     版本不唯一时，后面带上版本号
     ``` sh
@@ -46,14 +46,14 @@
 
 ## 虚拟机配置文件 `vagrantFile`
 
-- 生成 `vagrantFile`
+- ### 生成 `vagrantFile`
 
     进入你建立的存放虚拟机管理文件的目录下，执行以下命令生成 `vagrantFile`
     ``` sh
     vagrant init
     ```
 
-- `vagrantFile` 分析
+- ### `vagrantFile` 分析
 
     `vagrantFile` 使用的是 `ruby` 语法
 
@@ -98,7 +98,7 @@
 
 ## vagrant 指令
 
-- 启动
+- ### 启动
     `vagrantFile` 中的所有配置会在第一次启动的时候全部加载，但是设置器中的内容，在后续启动时就不会再加载了，此时需要使用 `--provision`参数
     ``` sh
     # 启动虚拟机
@@ -108,12 +108,12 @@
     vagrant up --provision
     ```
 
-- 关闭
+- ### 关闭
     ``` sh
     vagrant halt
     ```
 
-- 重启
+- ### 重启
 
     `reload` 重启时会重新加载 `vagrantFile` 中的修改过的设置，但是设置器部分的修改不会重新加载
     ``` sh
@@ -124,3 +124,75 @@
     vagrant reload --provision
     ```
 
+- ### 休眠
+    ```
+    vagrant suspend
+    ```
+- ### 恢复休眠
+
+    ```
+    vagrant resume
+    ```
+
+
+# 虚拟机管理
+
+## box管理
+
+- ### 打包
+    ``` sh
+    # 查看帮助命令
+    vagrant package --help
+
+    Options:
+
+        --base NAME                  Name of a VM in VirtualBox to package as a base box (VirtualBox Only)
+        --output NAME                Name of the file to output
+        --include FILE,FILE..        Comma separated additional files to package with the box
+        --vagrantfile FILE           Vagrantfile to package with the box
+    -h, --help                       Print this help
+    ```
+
+    >`--base NAME` vbox里的虚拟机的名称<br>
+    `--output NAME` 指要打包的box名称，需要手动添加后缀.box<br>
+    `--include FILE...` 打包时包含的文件名<br>
+    `--vagrantfile FILE` 打包时包含的Vagrantfile文件似<br>
+
+    ``` sh
+    vagrant package --base centos7.2_laradoc --output centos7.2_kernel-3.10.0-1160.box --vagrantfile ./vagrantFile
+    ```
+
+- ### 版本管理
+    在box的目录下新建文件 `metadata.json`
+    ``` json
+    {
+        "name": "centos/7.2",
+        "versions": [{
+            "version": "3.10.0-1160",
+            "providers": [{
+                "name": "virtualbox",
+                "url": "./centos7.2_kernel-3.10.0-1160.box"
+            }]
+        }]
+    }
+    ```
+    >`name`: 添加的box名字<br>
+    `version`：版本号<br>
+    `providers.name`：虚拟主机类型<br>
+    `providers.url`：box地址
+
+    添加box时，添加该json文件
+    ``` sh
+    vagrant box add metadata.json
+    ```
+
+    查看box列表就会看到带有版本号的box
+    ``` sh
+    $ vagrant box list
+    centos/7     (virtualbox, 0)
+    centos/7.2   (virtualbox, 0)
+    centos/7.2   (virtualbox, 3.10.0-1160)
+    lc/homestead (virtualbox, 8.2.1)
+    ```
+
+    在 `.vagrant.d\boxes\centos-VAGRANTSLASH-7.2` 目录下会出现两个不同版本号的文件夹
